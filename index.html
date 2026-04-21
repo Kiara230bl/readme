@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1D4ED8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Campus UAP">
+<link rel="manifest" href="manifest.json">
+<title>Campus UAP · Kiara</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0F1E;--ink2:#1E2A45;
+  --blue:#1D4ED8;--blue2:#2563EB;--blue3:#3B82F6;--bl:#DBEAFE;--bxl:#EFF6FF;
+  --cyan:#06B6D4;--cl:#CFFAFE;
+  --rose:#F43F5E;--rl:#FFE4E6;
+  --amber:#F59E0B;--al:#FEF3C7;
+  --em:#10B981;--el:#D1FAE5;
+  --vi:#7C3AED;--vl:#EDE9FE;
+  --gray:#64748B;--gray2:#94A3B8;
+  --borde:#E2E8F0;--surf:#F8FAFF;--w:#FFFFFF;
+  --sh:0 1px 3px rgba(29,78,216,.08),0 4px 16px rgba(0,0,0,.04);
+  --sh2:0 8px 32px rgba(29,78,216,.18),0 2px 8px rgba(0,0,0,.06);
+  --sb: env(safe-area-inset-bottom, 0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--surf);color:var(--ink);height:100%;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--blue);
+  color:white;
+  padding:12px 16px;
+  padding-top:calc(12px + env(safe-area-inset-top,0px));
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+  box-shadow:0 2px 12px rgba(29,78,216,.4);
+  position:relative;
+  z-index:10;
+}
+.top-left{display:flex;align-items:center;gap:10px}
+.top-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.3px}
+.top-logo span{color:var(--cyan);opacity:.9}
+.top-sync{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:white;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.top-sync:hover{background:rgba(255,255,255,.25)}
+.top-right{display:flex;align-items:center;gap:8px}
+.sync-code-pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s}
+.sync-code-pill:hover{background:rgba(255,255,255,.25)}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--gray2);transition:all .4s}
+.sdot.on{background:var(--em);box-shadow:0 0 5px var(--em)}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:16px}
+.page.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  background:var(--w);
+  border-top:1px solid var(--borde);
+  display:flex;
+  flex-shrink:0;
+  padding-bottom:calc(6px + var(--sb));
+  box-shadow:0 -2px 12px rgba(0,0,0,.06);
+}
+.bnav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:8px 4px 6px;cursor:pointer;color:var(--gray2);
+  font-size:10px;font-weight:600;gap:3px;transition:color .15s;position:relative;
+  border:none;background:none;
+}
+.bnav-item.active{color:var(--blue)}
+.bnav-item.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--blue);border-radius:0 0 2px 2px}
+.bnav-ico{font-size:20px;line-height:1}
+.bnav-bdg{position:absolute;top:4px;right:calc(50% - 16px);background:var(--rose);color:white;font-size:9px;font-weight:800;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;display:none}
+
+/* ── CARDS ── */
+.card{background:var(--w);border:1px solid var(--borde);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:var(--sh)}
+.card-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat{background:var(--w);border:1px solid var(--borde);border-radius:14px;padding:14px;position:relative;overflow:hidden;box-shadow:var(--sh)}
+.stat::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat.r::after{background:var(--rose)}.stat.a::after{background:var(--amber)}.stat.b::after{background:var(--blue3)}.stat.v::after{background:var(--vi)}
+.stat-n{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1;margin-bottom:2px}
+.stat.r .stat-n{color:var(--rose)}.stat.a .stat-n{color:var(--amber)}.stat.b .stat-n{color:var(--blue)}.stat.v .stat-n{color:var(--vi)}
+.stat-l{font-size:11px;color:var(--gray)}
+.stat-ico{position:absolute;right:10px;top:8px;font-size:22px;opacity:.1}
+
+/* ── TAREA ITEM ── */
+.titem{background:var(--w);border:1px solid var(--borde);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;border-left:4px solid var(--borde);transition:all .2s;box-shadow:var(--sh)}
+.titem.urg{border-left-color:var(--rose)}.titem.warn{border-left-color:var(--amber)}.titem.ok{border-left-color:var(--blue3)}.titem.past{border-left-color:var(--gray2);opacity:.55}
+.ti-body{flex:1;min-width:0}
+.ti-title{font-size:14px;font-weight:600;margin-bottom:2px;line-height:1.3}
+.ti-mat{font-size:12px;color:var(--gray);margin-bottom:5px}
+.ti-tags{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.4px}
+.t-tarea{background:var(--bl);color:var(--blue)}.t-parcial{background:var(--rl);color:#BE123C}
+.t-final{background:var(--vl);color:var(--vi)}.t-trabajo{background:var(--al);color:#92400E}
+.t-presentacion{background:var(--cl);color:#0E7490}.t-evento{background:var(--el);color:#065F46}
+.t-otro{background:#F1F5F9;color:var(--gray)}.t-manual{background:var(--vl);color:var(--vi)}
+.t-moodle{background:var(--bl);color:var(--blue)}
+.flbl{font-size:11px;color:var(--gray)}
+.ti-nota{font-size:11px;color:var(--gray2);margin-top:4px;font-style:italic;line-height:1.4}
+.done-btn{width:28px;height:28px;border-radius:50%;border:2px solid var(--borde);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:all .2s;color:var(--gray2);margin-top:1px}
+.done-btn:active{background:var(--el);border-color:var(--em);color:var(--em);transform:scale(1.1)}
+.del-btn{width:26px;height:26px;border-radius:50%;border:none;background:var(--rl);cursor:pointer;color:var(--rose);font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── HORARIO ── */
+.hor-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.hor{border-collapse:collapse;font-size:11px;min-width:600px}
+table.hor th{background:var(--blue);color:white;padding:7px 5px;text-align:center;font-weight:600;font-size:10px;white-space:nowrap}
+table.hor th.hth{background:var(--ink);text-align:left;padding-left:10px;min-width:90px}
+table.hor td{border:1px solid var(--borde);padding:3px;text-align:center;background:var(--w);min-width:100px}
+table.hor td.htd{font-size:10px;color:var(--gray);background:var(--surf);padding:3px 8px;text-align:left;white-space:nowrap;font-weight:600;border:1px solid var(--borde)}
+.hc{border-radius:6px;padding:4px 3px;font-size:10px;font-weight:600;line-height:1.3;display:block}
+
+/* ── UBICACION ── */
+.ub-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bl);color:var(--blue);font-size:10px;font-weight:600;border-radius:6px;padding:2px 7px;margin-top:3px;cursor:pointer;border:none}
+.ub-chip:active{background:var(--bxl)}
+
+/* ── CALENDARIO ── */
+.cal-header-strip{display:grid;grid-template-columns:repeat(7,1fr);background:var(--blue);margin-bottom:2px}
+.cal-header-strip span{text-align:center;padding:6px 2px;font-size:10px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--borde)}
+.cday{background:var(--w);min-height:52px;padding:4px 3px;cursor:pointer;position:relative;overflow:hidden}
+.cday:active{background:var(--bxl)}
+.cday.otro-mes .day-num{color:var(--gray2);opacity:.4}
+.cday.hoy .day-num{background:var(--blue);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.cday.sel{background:var(--bxl)}
+.cday.es-feriado{background:#FFFBEB}
+.day-num{font-size:12px;font-weight:600;margin-bottom:2px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.day-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin-right:1px}
+.day-dots{display:flex;flex-wrap:wrap;gap:1px;margin-top:1px}
+.cal-ev-line{font-size:9px;font-weight:600;padding:1px 3px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── FORM ── */
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fg label{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}
+input,select,textarea{padding:10px 12px;border:1.5px solid var(--borde);border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--w);outline:none;width:100%;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue3);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+textarea{resize:vertical;min-height:64px}
+.frow{display:grid;gap:10px}.f2{grid-template-columns:1fr 1fr}.f3{grid-template-columns:1fr 1fr 1fr}
+.btn{padding:12px 18px;border-radius:10px;border:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;width:100%}
+.bp{background:var(--blue);color:white}.bp:active{background:var(--blue2);transform:scale(.98)}
+.bd{background:var(--rl);color:var(--rose);border:1px solid #FCA5A5}.bd:active{background:#FFD7DC}
+.bv{background:var(--vl);color:var(--vi);border:1px solid #C4B5FD}.bv:active{background:#DDD6FE}
+.bo{background:none;border:1.5px solid var(--borde);color:var(--gray)}.bo:active{background:var(--surf)}
+.bsm{padding:8px 14px;font-size:12px;border-radius:8px;width:auto}
+
+/* ── MODAL / SHEET ── */
+.sheet-overlay{position:fixed;inset:0;background:rgba(10,15,30,.5);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(3px)}
+.sheet-overlay.open{display:flex}
+.sheet{background:var(--w);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:20px 16px;padding-bottom:calc(20px + var(--sb));animation:slideUp .25s cubic-bezier(.4,0,.2,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;background:var(--borde);border-radius:2px;margin:0 auto 16px}
+.sheet-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.sheet-x{background:var(--surf);border:none;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--gray);flex-shrink:0}
+
+/* ── SYNC PANEL ── */
+.sync-panel{background:var(--ink);color:white;border-radius:14px;padding:16px;margin-bottom:12px}
+.sync-code-display{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;letter-spacing:4px;color:var(--cyan);text-align:center;padding:12px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);border-radius:10px;margin:10px 0;cursor:pointer}
+.sync-instructions{font-size:12px;color:rgba(255,255,255,.6);line-height:1.6;margin-top:8px}
+.sync-instructions strong{color:rgba(255,255,255,.9)}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin:10px 0;display:none}
+.prog-bar{height:4px;background:var(--borde);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--blue3),var(--cyan));border-radius:2px;transition:width .35s ease;width:0}
+.prog-txt{font-size:11px;color:var(--gray)}
+.conn-msg{margin-top:8px;padding:8px 12px;border-radius:8px;font-size:13px;display:none}
+.conn-msg.ok{background:var(--el);color:#065F46}.conn-msg.err{background:var(--rl);color:#9F1239}.conn-msg.load{background:var(--bl);color:var(--blue)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:36px 16px;color:var(--gray)}
+.empty-ico{font-size:40px;margin-bottom:8px;opacity:.3}
+.empty-txt{font-size:14px}
+
+/* ── ALERT ── */
+.alert-bar{background:var(--rl);border:1px solid #FCA5A5;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:none;align-items:center;gap:8px;font-size:13px;color:#9F1239;font-weight:600}
+
+/* TABS */
+.tabs{display:flex;gap:3px;background:var(--surf);border:1px solid var(--borde);border-radius:9px;padding:3px;margin-bottom:14px}
+.tbtn{flex:1;padding:7px 6px;border-radius:7px;border:none;background:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:var(--gray);transition:all .15s;text-align:center}
+.tbtn.active{background:var(--w);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+/* SEMANAS FINALES */
+.semana-chip{display:inline-block;background:var(--vl);color:var(--vi);border:1px solid #C4B5FD;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;margin-right:6px;margin-bottom:6px}
+
+/* UAP eventos */
+.ubadge{background:var(--bl);color:var(--blue);font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;text-transform:uppercase;margin-left:3px}
+.fbadge{background:var(--al);color:#92400E;font-size:9px;font-weight:700;padding:1px 5px;border-radius:5px;text-transform:uppercase;margin-left:3px}
+
+/* install banner */
+.install-banner{background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:none;align-items:center;gap:10px}
+.install-banner .ib-txt{flex:1;font-size:13px;font-weight:500}
+.install-banner .ib-btn{background:white;color:var(--blue);border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--borde);border-radius:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="top-left">
+    <div class="top-logo">KL <span>Campus</span></div>
+    <div class="sdot" id="sdot"></div>
+  </div>
+  <div class="top-right">
+    <div class="sync-code-pill" id="sync-pill" onclick="openSheet('sheet-sync')">
+      🔗 <span id="pill-code">Sin sync</span>
+    </div>
+    <button class="top-sync" id="btn-sync" title="Sincronizar Moodle">↻</button>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="install-banner">
+  <span style="font-size:22px">📲</span>
+  <div class="ib-txt">Instalá esta app en tu celular</div>
+  <button class="ib-btn" id="install-btn">Instalar</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ═══ INICIO ═══ -->
+  <div class="page active" id="pg-inicio">
+    <div class="alert-bar" id="alert-bar"><span>⚠️</span><span id="alert-txt"></span></div>
+    <div class="stats-row">
+      <div class="stat r"><div class="stat-n" id="ds-u">0</div><div class="stat-l">Urgente</div><div class="stat-ico">🔴</div></div>
+      <div class="stat a"><div class="stat-n" id="ds-s">0</div><div class="stat-l">Esta semana</div><div class="stat-ico">📅</div></div>
+      <div class="stat b"><div class="stat-n" id="ds-t">0</div><div class="stat-l">Pendientes</div><div class="stat-ico">📋</div></div>
+      <div class="stat v"><div class="stat-n" id="ds-e">0</div><div class="stat-l">Exámenes</div><div class="stat-ico">📝</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📬 Próximas entregas</div>
+      <div id="dash-list"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--rose)">📝 Parciales próximos</div>
+      <div id="dash-par"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--vi)">🎓 Finales registrados</div>
+      <div id="dash-fin"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--amber)">🗓️ Próximos eventos UAP</div>
+      <div id="dash-ev"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAREAS ═══ -->
+  <div class="page" id="pg-tareas">
+    <div class="tabs" id="tar-tabs">
+      <button class="tbtn active" data-f="pend">Pendientes</button>
+      <button class="tbtn" data-f="todas">Todas</button>
+      <button class="tbtn" data-f="done">Hechas</button>
+    </div>
+    <div id="list-tar"></div>
+    <button class="btn bp" onclick="openSheet('sheet-tarea')" style="margin-top:8px">+ Nueva tarea</button>
+  </div>
+
+  <!-- ═══ EXÁMENES ═══ -->
+  <div class="page" id="pg-examenes">
+    <div class="tabs" id="ex-tabs">
+      <button class="tbtn active" data-et="parciales">Parciales</button>
+      <button class="tbtn" data-et="finales">Finales</button>
+    </div>
+
+    <div id="ex-parciales-view">
+      <div id="list-par"></div>
+      <button class="btn bd" onclick="openSheet('sheet-parcial')" style="margin-top:8px">+ Nuevo parcial</button>
+    </div>
+
+    <div id="ex-finales-view" style="display:none">
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title" style="color:var(--vi);font-size:13px">📅 Semanas de exámenes finales UAP</div>
+        <div class="semana-chip">Julio 2026 · 6–17</div>
+        <div class="semana-chip">Dic 2026 · 7–18</div>
+        <div class="semana-chip">Feb 2027 · 1–12</div>
+        <div style="font-size:11px;color:var(--gray);margin-top:8px">Registrá la materia ahora y agregá la fecha cuando la confirmes con el profe.</div>
+      </div>
+      <div id="list-fin"></div>
+      <button class="btn bv" onclick="openSheet('sheet-final')" style="margin-top:8px">+ Nuevo final</button>
+    </div>
+  </div>
+
+  <!-- ═══ HORARIO ═══ -->
+  <div class="page" id="pg-horario">
+    <div class="card">
+      <div class="card-title">🕐 Mi horario</div>
+      <div style="font-size:11px;color:var(--gray);margin-bottom:10px">Lic. Comunicación Social · UAP</div>
+      <div class="hor-scroll"><table class="hor" id="tbl-hor"></table></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <div class="card-title">📍 Ubicación de aulas</div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:10px">Anotá dónde queda cada materia para no perderte.</div>
+      <div id="aulas-list"></div>
+      <button class="btn bo bsm" onclick="openSheet('sheet-aula')" style="margin-top:8px">+ Agregar ubicación</button>
+    </div>
+  </div>
+
+  <!-- ═══ CALENDARIO ═══ -->
+  <div class="page" id="pg-calendario">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="bo bsm btn" id="cal-prev" style="width:32px;height:32px;padding:0;font-size:18px">‹</button>
+        <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;min-width:140px;text-align:center" id="cal-lbl"></span>
+        <button class="bo bsm btn" id="cal-next" style="width:32px;height:32px;padding:0;font-size:18px">›</button>
+      </div>
+      <button class="btn bp bsm" onclick="openSheet('sheet-ev')">+ Evento</button>
+    </div>
+    <div class="card" style="padding:10px 8px">
+      <div class="cal-header-strip">
+        <span>Do</span><span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span>
+      </div>
+      <div class="cal-grid" id="cal-days"></div>
+    </div>
+    <div class="card" id="sel-day-card" style="display:none">
+      <div class="card-title" id="sel-day-lbl"></div>
+      <div id="sel-day-evs"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:var(--blue);font-size:14px">📚 Calendario UAP 2026</div>
+      <div class="tabs" id="uap-tabs" style="margin-bottom:8px">
+        <button class="tbtn active" data-ut="todos">Todos</button>
+        <button class="tbtn" data-ut="academico">Acad.</button>
+        <button class="tbtn" data-ut="feriado">Feriados</button>
+        <button class="tbtn" data-ut="religioso">Relig.</button>
+      </div>
+      <div id="uap-lista" style="max-height:240px;overflow-y:auto"></div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="font-size:14px">🗂️ Mis eventos</div>
+      <div id="mis-ev-lista"></div>
+    </div>
+  </div>
+
+  <!-- ═══ CONFIG ═══ -->
+  <div class="page" id="pg-config">
+    <div class="card">
+      <div class="card-title">👤 Mi perfil</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0">
+        <div style="width:48px;height:48px;background:linear-gradient(135deg,var(--blue3),var(--cyan));border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:white;flex-shrink:0">KL</div>
+        <div>
+          <div style="font-weight:700;font-size:15px">Kiara Belén Liebich</div>
+          <div style="font-size:12px;color:var(--gray)">Legajo 41157 · Lic. Comunicación Social</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 Conexión con Moodle UAP</div>
+      <div style="background:var(--bxl);border:1px solid var(--blue3);border-radius:9px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--blue);line-height:1.7">
+        <strong>Cómo obtener tu token:</strong><br>
+        1· Entrá a <strong>campusvirtual.uap.edu.ar</strong><br>
+        2· Tu nombre → Preferencias → Seguridad<br>
+        3· Claves de seguridad → <strong>Moodle mobile web service</strong><br>
+        4· Copiá el token (resetealo primero si podés)
+      </div>
+      <div class="fg" style="margin-bottom:10px"><label>Token de acceso Moodle</label><input type="password" id="cfg-tok" placeholder="Pegá tu token aquí..." autocomplete="off"></div>
+      <button class="btn bp" id="btn-save-tok">Guardar y conectar</button>
+      <div class="prog-wrap" id="prog-wrap"><div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div><div class="prog-txt" id="prog-txt"></div></div>
+      <div class="conn-msg" id="conn-msg"></div>
+    </div>
+
+    <div class="sync-panel" id="sync-panel-cfg">
+      <div class="card-title" style="color:white;font-size:14px">📱 Sincronización entre dispositivos</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:10px;line-height:1.6">
+        Tu código de sync. Usalo en otro dispositivo para compartir todos tus datos.
+      </div>
+      <div class="sync-code-display" id="sync-code-display" onclick="copiarCodigo()">
+        Generando...
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.5);text-align:center">Tocá para copiar · Los datos se sincronizan al abrir la app</div>
+      <div style="margin-top:12px">
+        <div class="fg" style="margin-bottom:8px"><label style="color:rgba(255,255,255,.6)">Ingresar código de otro dispositivo</label><input type="text" id="input-sync-code" placeholder="Ej: KL-4829" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:white;letter-spacing:2px" maxlength="8"></div>
+        <button class="btn" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.2)" id="btn-import-code">Importar datos de ese dispositivo</button>
+      </div>
+      <div id="sync-result" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:8px;display:none"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔔 Alertas</div>
+      <div class="fg"><label>Avisar con anticipación</label><select id="cfg-dias"><option value="1">1 día</option><option value="2">2 días</option><option value="3" selected>3 días</option><option value="5">5 días</option><option value="7">1 semana</option></select></div>
+      <button class="btn bp bsm" id="btn-save-cfg">Guardar</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="font-size:14px">🗑️ Elementos manuales</div>
+      <div id="cfg-mans"></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" data-pg="inicio"><div class="bnav-ico">🏠</div><span>Inicio</span><span class="bnav-bdg" id="nb-u"></span></button>
+  <button class="bnav-item" data-pg="tareas"><div class="bnav-ico">📋</div><span>Tareas</span><span class="bnav-bdg" id="nb-t"></span></button>
+  <button class="bnav-item" data-pg="examenes"><div class="bnav-ico">📝</div><span>Exámenes</span><span class="bnav-bdg" id="nb-e"></span></button>
+  <button class="bnav-item" data-pg="horario"><div class="bnav-ico">🕐</div><span>Horario</span></button>
+  <button class="bnav-item" data-pg="calendario"><div class="bnav-ico">📅</div><span>Calendario</span></button>
+  <button class="bnav-item" data-pg="config"><div class="bnav-ico">⚙️</div><span>Config</span></button>
+</nav>
+
+<!-- SHEETS / MODALES -->
+<div class="sheet-overlay" id="sheet-tarea">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Nueva tarea <button class="sheet-x" onclick="closeSheet('sheet-tarea')">✕</button></div>
+    <div class="frow f2"><div class="fg"><label>Materia</label><input type="text" id="mt-m" placeholder="Materia"></div><div class="fg"><label>Tipo</label><select id="mt-t"><option value="tarea">Tarea</option><option value="trabajo">TP</option><option value="presentacion">Presentación</option><option value="otro">Otro</option></select></div></div>
+    <div class="fg"><label>Descripción</label><input type="text" id="mt-d" placeholder="Descripción"></div>
+    <div class="fg"><label>Fecha de entrega</label><input type="date" id="mt-f"></div>
+    <div class="fg"><label>Notas</label><textarea id="mt-n" rows="2" placeholder="Detalles, aula, formato..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn bo" onclick="closeSheet('sheet-tarea')" style="flex:1">Cancelar</button>
+      <button class="btn bp" id="btn-mt-sv" style="flex:2">Guardar tarea</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-parcial">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:#BE123C">📝 Nuevo parcial <button class="sheet-x" onclick="closeSheet('sheet-parcial')">✕</button></div>
+    <div class="frow f2"><div class="fg"><label>Materia</label><input type="text" id="mp-m" placeholder="Locución I"></div><div class="fg"><label>Tipo</label><select id="mp-t"><option value="parcial1">1° Parcial</option><option value="parcial2">2° Parcial</option><option value="recuperatorio">Recuperatorio</option><option value="quiz">Quiz</option></select></div></div>
+    <div class="fg"><label>Descripción / temas</label><input type="text" id="mp-d" placeholder="Temas 1 al 5"></div>
+    <div class="frow f3"><div class="fg"><label>Fecha</label><input type="date" id="mp-f"></div><div class="fg"><label>Hora</label><input type="time" id="mp-h"></div><div class="fg"><label>Aula</label><input type="text" id="mp-a" placeholder="Aula 12"></div></div>
+    <div class="fg"><label>Notas</label><textarea id="mp-n" rows="2" placeholder="Bibliografía, temas..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn bo" onclick="closeSheet('sheet-parcial')" style="flex:1">Cancelar</button>
+      <button class="btn bd" id="btn-mp-sv" style="flex:2">Guardar parcial</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-final">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" style="color:var(--vi)">🎓 Nuevo final <button class="sheet-x" onclick="closeSheet('sheet-final')">✕</button></div>
+    <div style="background:var(--vl);border:1px solid #C4B5FD;border-radius:8px;padding:9px 11px;margin-bottom:12px;font-size:12px;color:var(--vi)">
+      💡 Podés dejar la fecha en blanco y completarla cuando confirmes con el profe.
+    </div>
+    <div class="frow f2"><div class="fg"><label>Materia</label><input type="text" id="mf-m" placeholder="Cosmovisión bíblica"></div><div class="fg"><label>Llamado</label><select id="mf-t"><option value="final1">1° llamado (Jul 2026)</option><option value="final2">2° llamado (Dic 2026)</option><option value="final3">3° llamado (Feb 2027)</option></select></div></div>
+    <div class="fg"><label>Fecha (opcional)</label><input type="date" id="mf-f"></div>
+    <div class="frow f2"><div class="fg"><label>Hora</label><input type="time" id="mf-h"></div><div class="fg"><label>Aula</label><input type="text" id="mf-a" placeholder="A confirmar"></div></div>
+    <div class="fg"><label>Notas / programa</label><textarea id="mf-n" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn bo" onclick="closeSheet('sheet-final')" style="flex:1">Cancelar</button>
+      <button class="btn bv" id="btn-mf-sv" style="flex:2">Guardar final</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-ev">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Nuevo evento <button class="sheet-x" onclick="closeSheet('sheet-ev')">✕</button></div>
+    <div class="fg"><label>Título</label><input type="text" id="mev-ti" placeholder="Reunión de grupo, entrega..."></div>
+    <div class="frow f2"><div class="fg"><label>Fecha</label><input type="date" id="mev-f"></div><div class="fg"><label>Tipo</label><select id="mev-t"><option value="personal">Personal</option><option value="academico">Académico</option><option value="otro">Otro</option></select></div></div>
+    <div class="fg"><label>Notas</label><textarea id="mev-n" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn bo" onclick="closeSheet('sheet-ev')" style="flex:1">Cancelar</button>
+      <button class="btn bp" id="btn-mev-sv" style="flex:2">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-aula">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">📍 Ubicación de aula <button class="sheet-x" onclick="closeSheet('sheet-aula')">✕</button></div>
+    <div class="fg"><label>Materia</label><input type="text" id="au-mat" placeholder="Ej: Locución I"></div>
+    <div class="fg"><label>Ubicación / aula</label><input type="text" id="au-ub" placeholder="Ej: Edificio A, Aula 12 — 1er piso"></div>
+    <div class="fg"><label>Días / horario</label><input type="text" id="au-dia" placeholder="Ej: Jueves y viernes 14:30"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn bo" onclick="closeSheet('sheet-aula')" style="flex:1">Cancelar</button>
+      <button class="btn bp" id="btn-au-sv" style="flex:2">Guardar ubicación</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="sheet-sync">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">📱 Sync entre dispositivos <button class="sheet-x" onclick="closeSheet('sheet-sync')">✕</button></div>
+    <div class="sync-panel" style="margin-bottom:12px">
+      <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:8px"><strong style="color:white">Tu código:</strong> compartilo o usalo en otro dispositivo.</div>
+      <div class="sync-code-display" id="sync-code-display2" onclick="copiarCodigo()">Generando...</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.5);text-align:center">Tocá para copiar</div>
+    </div>
+    <div class="fg"><label>Importar código de otro dispositivo</label><input type="text" id="input-sync-code2" placeholder="Ej: KL-4829" style="letter-spacing:2px;text-transform:uppercase" maxlength="8"></div>
+    <button class="btn bp" id="btn-import-code2">Importar datos</button>
+    <div id="sync-result2" style="font-size:12px;color:var(--gray);margin-top:8px;display:none"></div>
+    <div style="font-size:11px;color:var(--gray2);margin-top:14px;line-height:1.6;padding:10px;background:var(--surf);border-radius:8px">
+      <strong>¿Cómo funciona?</strong><br>
+      · En PC: abrí la app → Config → copiá el código<br>
+      · En el celu: instalá la PWA → Config → ingresá el código<br>
+      · Los datos se guardan en tu navegador + en un código exportable<br>
+      · Cada vez que sincronizás, los datos más recientes ganan
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATOS UAP 2026
+// ══════════════════════════════════════════════════════
+const UAP=[
+  {f:'2026-01-01',t:'Año nuevo',tipo:'feriado'},
+  {f:'2026-02-16',t:'Carnaval',tipo:'feriado'},{f:'2026-02-17',t:'Carnaval',tipo:'feriado'},
+  {f:'2026-03-24',t:'Día Memoria, Verdad y Justicia',tipo:'feriado'},
+  {f:'2026-04-02',t:'Veteranos y Caídos en Malvinas',tipo:'feriado'},
+  {f:'2026-04-02',t:'Jueves Santo',tipo:'feriado'},{f:'2026-04-03',t:'Viernes Santo',tipo:'feriado'},
+  {f:'2026-05-01',t:'Día del Trabajador',tipo:'feriado'},{f:'2026-05-25',t:'Revolución de Mayo',tipo:'feriado'},
+  {f:'2026-06-20',t:'Muerte del Gral. Belgrano',tipo:'feriado'},{f:'2026-07-09',t:'Día de la Independencia',tipo:'feriado'},
+  {f:'2026-07-12',t:'Día no laborable turístico',tipo:'feriado'},{f:'2026-08-12',t:'Inmaculada Concepción',tipo:'feriado'},
+  {f:'2026-08-17',t:'Muerte del Gral. San Martín',tipo:'feriado'},
+  {f:'2026-10-12',t:'Día de la Diversidad Cultural',tipo:'feriado'},
+  {f:'2026-11-23',t:'Día de la Soberanía Nacional',tipo:'feriado'},{f:'2026-12-25',t:'Navidad',tipo:'feriado'},
+  {f:'2027-01-01',t:'Año nuevo 2027',tipo:'feriado'},{f:'2027-02-15',t:'Batalla de Caseros 2027',tipo:'feriado'},
+  {f:'2026-03-02',t:'Acto inicio de clases',tipo:'academico'},
+  {f:'2026-03-09',t:'Semana Aplicación del EPCA',tipo:'academico'},
+  {f:'2026-04-20',t:'Semana de investigación',tipo:'academico'},
+  {f:'2026-05-11',t:'Fiesta Malonera',tipo:'academico'},
+  {f:'2026-06-08',t:'Semana de Colportaje',tipo:'academico'},
+  {f:'2026-07-06',t:'Inicio receso escolar',tipo:'academico'},
+  {f:'2026-07-07',t:'Semana exámenes finales',tipo:'academico'},{f:'2026-07-08',t:'Semana exámenes finales',tipo:'academico'},
+  {f:'2026-07-09',t:'Semana exámenes finales',tipo:'academico'},{f:'2026-07-10',t:'Semana exámenes finales',tipo:'academico'},
+  {f:'2026-07-13',t:'Semana exámenes finales',tipo:'academico'},{f:'2026-07-14',t:'Semana exámenes finales',tipo:'academico'},
+  {f:'2026-07-15',t:'Semana exámenes finales',tipo:'academico'},{f:'2026-07-16',t:'Semana exámenes finales',tipo:'academico'},
+  {f:'2026-07-17',t:'Semana exámenes finales',tipo:'academico'},
+  {f:'2026-07-20',t:'Vuelta a clases',tipo:'academico'},
+  {f:'2026-11-30',t:'Último día solicitar graduación',tipo:'academico'},
+  {f:'2026-12-07',t:'Graduación + inicio finales',tipo:'academico'},
+  {f:'2026-12-18',t:'Fin semana exámenes diciembre',tipo:'academico'},
+  {f:'2027-02-01',t:'Inicio finales febrero 2027',tipo:'academico'},
+  {f:'2027-02-12',t:'Fin finales febrero 2027',tipo:'academico'},
+  {f:'2026-04-11',t:'Semana Énfasis Espiritual',tipo:'religioso'},
+  {f:'2026-08-29',t:'Homecoming',tipo:'religioso'},
+  {f:'2026-09-05',t:'Culto acción de Gracias',tipo:'religioso'},
+];
+
+const FRANJAS=['08:30–09:25','09:30–10:25','13:30–14:25','14:30–15:25','15:30–16:25','16:30–17:25','17:30–18:25','18:30–19:25'];
+const DHOR=['Lunes','Martes','Miércoles','Jueves','Viernes'];
+const MC={
+  Historia:{bg:'#DBEAFE',c:'#1E3A8A',s:'Historia ideas I'},
+  Intro:{bg:'#CFFAFE',c:'#0E7490',s:'Intro vida universitaria'},
+  Cosmo:{bg:'#EDE9FE',c:'#4C1D95',s:'Cosmovisión bíblica'},
+  PAdm:{bg:'#FEF3C7',c:'#78350F',s:'Ppios. adm. y org.'},
+  LabDig:{bg:'#FEE2E2',c:'#7F1D1D',s:'Lab. digital'},
+  Taller:{bg:'#FCE7F3',c:'#831843',s:'Taller de redacción'},
+  LabCreat:{bg:'#DCFCE7',c:'#14532D',s:'Lab. creatividad'},
+  Socio:{bg:'#F1F5F9',c:'#334155',s:'Sociología comunicación'},
+  Locu:{bg:'#FEE2E2',c:'#991B1B',s:'Locución I'},
+};
+const HDATA=[
+  ['08:30–09:25','Jueves','Historia'],['08:30–09:25','Viernes','Historia'],
+  ['09:30–10:25','Jueves','Historia'],['09:30–10:25','Viernes','Historia'],
+  ['13:30–14:25','Martes','Intro'],
+  ['14:30–15:25','Lunes','Cosmo'],['14:30–15:25','Martes','PAdm'],['14:30–15:25','Miércoles','Cosmo'],['14:30–15:25','Jueves','PAdm'],
+  ['15:30–16:25','Lunes','LabDig'],['15:30–16:25','Martes','PAdm'],['15:30–16:25','Miércoles','LabCreat'],['15:30–16:25','Jueves','PAdm'],
+  ['16:30–17:25','Lunes','LabDig'],['16:30–17:25','Martes','Taller'],['16:30–17:25','Miércoles','LabCreat'],['16:30–17:25','Jueves','Locu'],
+  ['17:30–18:25','Lunes','Socio'],['17:30–18:25','Martes','Taller'],['17:30–18:25','Miércoles','LabDig'],['17:30–18:25','Jueves','Locu'],
+  ['18:30–19:25','Lunes','Socio'],['18:30–19:25','Martes','Taller'],['18:30–19:25','Miércoles','LabDig'],['18:30–19:25','Jueves','Locu'],
+];
+
+// ══════════════════════════════════════════════════════
+// INDEXEDDB — guardado robusto
+// ══════════════════════════════════════════════════════
+const DB_NAME='campus_uap_db', DB_VER=1, STORE='datos';
+let db=null;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req=indexedDB.open(DB_NAME,DB_VER);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE,{keyPath:'key'});
+    };
+    req.onsuccess=e=>{db=e.target.result;res(db);};
+    req.onerror=e=>rej(e);
+  });
+}
+
+async function dbSet(key,value){
+  if(!db) await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put({key,value});
+    tx.oncomplete=()=>res();
+    tx.onerror=e=>rej(e);
+  });
+}
+
+async function dbGet(key){
+  if(!db) await openDB();
+  return new Promise((res,rej)=>{
+    const tx=db.transaction(STORE,'readonly');
+    const req=tx.objectStore(STORE).get(key);
+    req.onsuccess=e=>res(e.target.result?.value);
+    req.onerror=e=>rej(e);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let S={token:'',alertDias:3,tareas:[],parciales:[],finales:[],eventos:[],aulas:[],syncCode:'',lastSync:null,connected:false};
+
+async function saveAll(){
+  try{
+    await dbSet('state',JSON.stringify(S));
+    // También localStorage como fallback
+    localStorage.setItem('campus_uap_bk',JSON.stringify(S));
+  }catch(e){ localStorage.setItem('campus_uap_bk',JSON.stringify(S)); }
+}
+
+async function loadAll(){
+  try{
+    await openDB();
+    let data=await dbGet('state');
+    if(!data){
+      // fallback a localStorage
+      data=localStorage.getItem('campus_uap_bk');
+    }
+    if(data){ S={...S,...JSON.parse(data)}; }
+  }catch(e){
+    const data=localStorage.getItem('campus_uap_bk');
+    if(data){ try{S={...S,...JSON.parse(data)};}catch(_){} }
+  }
+  if(!S.syncCode) S.syncCode=generarCodigo();
+  await saveAll();
+}
+
+function generarCodigo(){
+  return 'KL-'+Math.floor(1000+Math.random()*9000);
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+const MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const MC2=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const DIAS_S=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function hoy0(){const d=new Date();d.setHours(0,0,0,0);return d;}
+function pF(s){if(!s)return null;const d=new Date(s+'T00:00:00');d.setHours(0,0,0,0);return d;}
+function diff(s){if(!s)return 9999;return Math.round((pF(s)-hoy0())/86400000);}
+function fmt(s){
+  if(!s)return'Sin fecha confirmada';
+  const d=diff(s),dd=pF(s),b=dd.getDate()+' '+MC2[dd.getMonth()];
+  if(d<0)return b+' (pasada)';if(d===0)return'¡Hoy!';if(d===1)return'Mañana';
+  if(d<=7)return`en ${d} días (${b})`;return b;
+}
+function urgCls(s){if(!s)return'ok';const d=diff(s);if(d<0)return'past';if(d<=3)return'urg';if(d<=7)return'warn';return'ok';}
+function tTag(t){const m={tarea:'t-tarea',trabajo:'t-trabajo',presentacion:'t-presentacion',parcial1:'t-parcial',parcial2:'t-parcial',recuperatorio:'t-parcial',quiz:'t-parcial',final1:'t-final',final2:'t-final',final3:'t-final',evento:'t-evento',otro:'t-otro'};return m[t]||'t-otro';}
+function tLbl(t){const m={tarea:'Tarea',trabajo:'TP',presentacion:'Presentación',parcial1:'1° Parcial',parcial2:'2° Parcial',recuperatorio:'Recuperatorio',quiz:'Quiz',final1:'Final 1°',final2:'Final 2°',final3:'Final 3°',evento:'Evento',otro:'Otro'};return m[t]||t;}
+function toImg(s){if(!s)return'Sin fecha';const d=pF(s);return d.getDate()+' de '+MESES[d.getMonth()]+' '+d.getFullYear();}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+// ══════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════
+let curPg='inicio';
+function goTo(pg){
+  curPg=pg;
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(e=>e.classList.toggle('active',e.dataset.pg===pg));
+  document.getElementById('pg-'+pg).classList.add('active');
+  if(pg==='inicio')rDash();
+  if(pg==='tareas')rTar();
+  if(pg==='examenes')rEx();
+  if(pg==='horario')rHor();
+  if(pg==='calendario')rCal();
+  if(pg==='config')rCfg();
+}
+
+// ══════════════════════════════════════════════════════
+// HTML HELPERS
+// ══════════════════════════════════════════════════════
+function tiHTML(item,tipo,mini){
+  return`<div class="titem ${urgCls(item.fecha)}">
+    <button class="done-btn" data-id="${item.id}" data-tp="${tipo}">✓</button>
+    <div class="ti-body">
+      <div class="ti-title">${item.desc||item.materia}</div>
+      <div class="ti-mat">${item.materia}${item.desc&&item.materia!==item.desc?'':''}</div>
+      <div class="ti-tags">
+        <span class="tag ${tTag(item.tipo)}">${tLbl(item.tipo)}</span>
+        <span class="flbl">${fmt(item.fecha)}</span>
+        ${item.hora?`<span class="flbl">🕐 ${item.hora}</span>`:''}
+        ${item.aula?`<span class="flbl">📍 ${item.aula}</span>`:''}
+      </div>
+      ${item.notas&&!mini?`<div class="ti-nota">${item.notas}</div>`:''}
+    </div>
+    ${!mini?`<button class="del-btn" data-id="${item.id}" data-tp="${tipo}">✕</button>`:''}
+  </div>`;
+}
+
+function bindDD(el){
+  el.querySelectorAll('.done-btn').forEach(b=>b.addEventListener('click',async()=>{
+    const id=b.dataset.id,tp=b.dataset.tp;
+    const arr=tp==='tarea'?S.tareas:tp==='parcial'?S.parciales:S.finales;
+    const item=arr.find(x=>x.id===id);if(item)item.done=true;
+    await saveAll();
+    if(curPg==='inicio')rDash();else if(curPg==='tareas')rTar();else rEx();
+  }));
+  el.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',async()=>{
+    if(!confirm('¿Eliminar?'))return;
+    const id=b.dataset.id,tp=b.dataset.tp;
+    if(tp==='tarea')S.tareas=S.tareas.filter(x=>x.id!==id);
+    else if(tp==='parcial')S.parciales=S.parciales.filter(x=>x.id!==id);
+    else S.finales=S.finales.filter(x=>x.id!==id);
+    await saveAll();
+    if(curPg==='tareas')rTar();else if(curPg==='examenes')rEx();else rDash();
+  }));
+}
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════════════════════════
+function rDash(){
+  const hd=hoy0();
+  const tp=S.tareas.filter(x=>!x.done&&diff(x.fecha)>=0).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  const pp=S.parciales.filter(x=>!x.done&&diff(x.fecha)>=0).sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  const fp=S.finales.filter(x=>!x.done).sort((a,b)=>{if(!a.fecha&&!b.fecha)return 0;if(!a.fecha)return 1;if(!b.fecha)return -1;return new Date(a.fecha)-new Date(b.fecha);});
+  const all=[...tp,...pp];
+  const u=all.filter(x=>diff(x.fecha)<=3).length;
+  const sw=all.filter(x=>{const d=diff(x.fecha);return d>3&&d<=7;}).length;
+  document.getElementById('ds-u').textContent=u;
+  document.getElementById('ds-s').textContent=sw;
+  document.getElementById('ds-t').textContent=all.length;
+  document.getElementById('ds-e').textContent=pp.length+fp.filter(x=>x.fecha&&diff(x.fecha)>=0).length;
+  const setB=(id,v)=>{const el=document.getElementById(id);el.textContent=v;el.style.display=v>0?'inline-block':'none';};
+  setB('nb-u',u);setB('nb-t',tp.length);setB('nb-e',pp.length+fp.length);
+  const prx=all.find(x=>diff(x.fecha)>=0&&diff(x.fecha)<=S.alertDias);
+  const ab=document.getElementById('alert-bar');
+  if(prx){const d=diff(prx.fecha);ab.style.display='flex';document.getElementById('alert-txt').textContent=d===0?`¡"${prx.desc}" vence HOY!`:`"${prx.desc}" vence en ${d} día${d!==1?'s':''}!`;}
+  else ab.style.display='none';
+  const dl=document.getElementById('dash-list');
+  dl.innerHTML=tp.slice(0,4).map(t=>tiHTML(t,'tarea',true)).join('')||'<div class="empty"><div class="empty-ico">🎉</div><div class="empty-txt">Sin tareas pendientes</div></div>';
+  bindDD(dl);
+  const pl=document.getElementById('dash-par');
+  pl.innerHTML=pp.slice(0,3).map(p=>tiHTML(p,'parcial',true)).join('')||'<div style="font-size:12px;color:var(--gray);padding:6px 0">Sin parciales próximos</div>';
+  bindDD(pl);
+  document.getElementById('dash-fin').innerHTML=fp.slice(0,3).map(f=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--borde);font-size:13px"><span>🎓</span><div style="flex:1"><div style="font-weight:600">${f.materia}</div><div style="font-size:11px;color:var(--gray)">${tLbl(f.tipo)} · ${fmt(f.fecha)}</div></div></div>`).join('')||'<div style="font-size:12px;color:var(--gray);padding:6px 0">Sin finales registrados</div>';
+  const evs=UAP.filter(e=>pF(e.f)>=hd).sort((a,b)=>new Date(a.f)-new Date(b.f)).slice(0,4);
+  const col=e=>e.tipo==='feriado'?'var(--amber)':e.tipo==='religioso'?'var(--vi)':'var(--blue3)';
+  document.getElementById('dash-ev').innerHTML=evs.map(e=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--borde)"><div style="width:8px;height:8px;border-radius:50%;background:${col(e)};flex-shrink:0;margin-top:3px"></div><div><div style="font-size:12px;font-weight:600">${e.t}</div><div style="font-size:11px;color:var(--gray)">${toImg(e.f)}</div></div></div>`).join('')||'<div style="font-size:12px;color:var(--gray)">Sin eventos próximos</div>';
+}
+
+// ══════════════════════════════════════════════════════
+// TAREAS
+// ══════════════════════════════════════════════════════
+let tarF='pend';
+function rTar(){
+  let l=[...S.tareas].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha));
+  if(tarF==='pend')l=l.filter(x=>!x.done&&diff(x.fecha)>=0);
+  else if(tarF==='done')l=l.filter(x=>x.done);
+  const el=document.getElementById('list-tar');
+  el.innerHTML=l.length===0?'<div class="empty"><div class="empty-ico">📋</div><div class="empty-txt">No hay tareas en esta vista</div></div>':l.map(t=>{
+    if(t.done)return`<div class="titem past"><div class="ti-body"><div class="ti-title" style="text-decoration:line-through">${t.desc}</div><div class="ti-mat">${t.materia} · ${fmt(t.fecha)}</div></div><button class="del-btn" data-id="${t.id}" data-tp="tarea">✕</button></div>`;
+    return tiHTML(t,'tarea',false);}).join('');
+  bindDD(el);
+}
+
+// ══════════════════════════════════════════════════════
+// EXÁMENES
+// ══════════════════════════════════════════════════════
+let exTab='parciales';
+function rEx(){
+  if(exTab==='parciales') rParciales();
+  else rFinales();
+}
+function rParciales(){
+  const l=[...S.parciales].sort((a,b)=>{if(!a.fecha)return 1;if(!b.fecha)return -1;return new Date(a.fecha)-new Date(b.fecha);});
+  const el=document.getElementById('list-par');
+  el.innerHTML=l.length===0?'<div class="empty"><div class="empty-ico">📝</div><div class="empty-txt">Sin parciales. Agregá uno cuando tu profe avise.</div></div>':l.map(p=>tiHTML(p,'parcial',false)).join('');
+  bindDD(el);
+}
+function rFinales(){
+  const l=[...S.finales].sort((a,b)=>{if(!a.fecha&&!b.fecha)return 0;if(!a.fecha)return 1;if(!b.fecha)return -1;return new Date(a.fecha)-new Date(b.fecha);});
+  const el=document.getElementById('list-fin');
+  el.innerHTML=l.length===0?'<div class="empty"><div class="empty-ico">🎓</div><div class="empty-txt">Sin finales registrados aún.</div></div>':l.map(f=>{
+    const tieneFecha=!!f.fecha;
+    return`<div class="titem ${tieneFecha?urgCls(f.fecha):'ok'}" style="border-left-color:${tieneFecha?'var(--vi)':'var(--gray2)'}">
+      <button class="done-btn" data-id="${f.id}" data-tp="final">✓</button>
+      <div class="ti-body">
+        <div class="ti-title">${f.materia}</div>
+        <div class="ti-mat">${tLbl(f.tipo)}</div>
+        <div class="ti-tags">
+          <span class="tag ${tieneFecha?'t-final':'t-otro'}">${tieneFecha?fmt(f.fecha):'Sin fecha'}</span>
+          ${f.hora?`<span class="flbl">🕐 ${f.hora}</span>`:''}
+          ${f.aula?`<span class="flbl">📍 ${f.aula}</span>`:''}
+        </div>
+        ${f.notas?`<div class="ti-nota">${f.notas}</div>`:''}
+        ${!tieneFecha?`<button class="btn bv bsm" onclick="editFecha('${f.id}')" style="margin-top:8px;width:auto">📅 Agregar fecha</button>`:''}
+      </div>
+      <button class="del-btn" data-id="${f.id}" data-tp="final">✕</button>
+    </div>`;
+  }).join('');
+  bindDD(el);
+}
+function editFecha(id){
+  const f=S.finales.find(x=>x.id===id);if(!f)return;
+  const fecha=prompt('Ingresá la fecha (AAAA-MM-DD):','');
+  if(fecha&&/^\d{4}-\d{2}-\d{2}$/.test(fecha)){f.fecha=fecha;saveAll();rFinales();}
+  else if(fecha)alert('Formato: AAAA-MM-DD (ej: 2026-07-10)');
+}
+
+// ══════════════════════════════════════════════════════
+// HORARIO
+// ══════════════════════════════════════════════════════
+function rHor(){
+  const map={};HDATA.forEach(([f,d,m])=>{if(!map[f])map[f]={};map[f][d]=m;});
+  let h='<thead><tr><th class="hth">Hora</th>';
+  DHOR.forEach(d=>h+=`<th>${d}</th>`);h+='</tr></thead><tbody>';
+  FRANJAS.forEach(f=>{
+    h+=`<tr><td class="htd">${f}</td>`;
+    DHOR.forEach(d=>{const m=map[f]&&map[f][d];if(m){const c=MC[m];h+=`<td><span class="hc" style="background:${c.bg};color:${c.c}">${c.s}</span></td>`;}else h+='<td></td>';});
+    h+='</tr>';
+  });
+  h+='</tbody>';document.getElementById('tbl-hor').innerHTML=h;
+
+  // Aulas
+  const al=document.getElementById('aulas-list');
+  if(S.aulas.length===0){al.innerHTML='<div style="font-size:12px;color:var(--gray2)">Sin ubicaciones guardadas.</div>';return;}
+  al.innerHTML=S.aulas.map(a=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--borde)">
+    <span style="font-size:18px">📍</span>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:600">${a.materia}</div>
+      <div style="font-size:12px;color:var(--blue)">${a.ubicacion}</div>
+      ${a.dias?`<div style="font-size:11px;color:var(--gray2)">${a.dias}</div>`:''}
+    </div>
+    <button class="del-btn" data-aid="${a.id}">✕</button>
+  </div>`).join('');
+  al.querySelectorAll('[data-aid]').forEach(b=>b.addEventListener('click',async()=>{
+    S.aulas=S.aulas.filter(x=>x.id!==b.dataset.aid);await saveAll();rHor();
+  }));
+}
+
+// ══════════════════════════════════════════════════════
+// CALENDARIO
+// ══════════════════════════════════════════════════════
+let cY=new Date().getFullYear(),cM=new Date().getMonth(),cSel=null,uapF='todos';
+function rCal(){rCalMes();rUAP();rMisEv();}
+function rCalMes(){
+  document.getElementById('cal-lbl').textContent=MESES[cM]+' '+cY;
+  const first=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate(),todStr=iso(new Date());
+  const mp=`${cY}-${String(cM+1).padStart(2,'0')}`;
+  const evMap={};
+  const add=(f,t)=>{if(!evMap[f])evMap[f]=[];evMap[f].push(t);};
+  UAP.filter(e=>e.f.startsWith(mp)).forEach(e=>add(e.f,e.tipo));
+  S.tareas.filter(t=>!t.done&&t.fecha.startsWith(mp)).forEach(t=>add(t.fecha,'tarea'));
+  S.parciales.filter(p=>!p.done&&p.fecha&&p.fecha.startsWith(mp)).forEach(p=>add(p.fecha,'parcial'));
+  S.finales.filter(f=>!f.done&&f.fecha&&f.fecha.startsWith(mp)).forEach(f=>add(f.fecha,'final'));
+  S.eventos.filter(e=>e.fecha.startsWith(mp)).forEach(e=>add(e.fecha,'personal'));
+
+  let html='';
+  for(let i=0;i<first;i++){const d=new Date(cY,cM,1-first+i);html+=`<div class="cday otro-mes"><div class="day-num">${d.getDate()}</div></div>`;}
+  for(let d=1;d<=dim;d++){
+    const ds=`${mp}-${String(d).padStart(2,'0')}`;
+    const isH=ds===todStr,isS=ds===cSel,ev=evMap[ds]||[];
+    const isFer=ev.includes('feriado');
+    let dots='';
+    if(ev.includes('parcial')||ev.includes('final'))dots+=`<div class="day-dot" style="background:var(--rose)"></div>`;
+    if(ev.includes('tarea'))dots+=`<div class="day-dot" style="background:var(--blue3)"></div>`;
+    if(ev.includes('personal'))dots+=`<div class="day-dot" style="background:var(--cyan)"></div>`;
+    if(isFer||ev.includes('academico')||ev.includes('religioso'))dots+=`<div class="day-dot" style="background:var(--amber)"></div>`;
+    html+=`<div class="cday${isH?' hoy':''}${isS&&!isH?' sel':''}${isFer?' es-feriado':''}" data-dt="${ds}">
+      <div class="day-num">${d}</div>
+      ${dots?`<div class="day-dots">${dots}</div>`:''}
+    </div>`;
+  }
+  const total=first+dim,leftover=total%7===0?0:7-(total%7);
+  for(let d=1;d<=leftover;d++)html+=`<div class="cday otro-mes"><div class="day-num">${d}</div></div>`;
+  document.getElementById('cal-days').innerHTML=html;
+  document.querySelectorAll('.cday[data-dt]').forEach(el=>el.addEventListener('click',()=>{cSel=el.dataset.dt;rCalMes();rSelDay(el.dataset.dt);}));
+  if(cSel)rSelDay(cSel);
+}
+function rSelDay(ds){
+  const card=document.getElementById('sel-day-card');
+  if(!ds){card.style.display='none';return;}
+  const d=pF(ds);document.getElementById('sel-day-lbl').textContent=d.getDate()+' de '+MESES[d.getMonth()]+' '+d.getFullYear();
+  const items=[];
+  UAP.filter(e=>e.f===ds).forEach(e=>items.push({t:e.t,c:e.tipo==='feriado'?'var(--amber)':e.tipo==='religioso'?'var(--vi)':'var(--blue3)'}));
+  S.tareas.filter(t=>t.fecha===ds&&!t.done).forEach(t=>items.push({t:t.desc+' ('+t.materia+')',c:'var(--blue3)'}));
+  S.parciales.filter(p=>p.fecha===ds&&!p.done).forEach(p=>items.push({t:p.desc+' — '+p.materia,c:'var(--rose)'}));
+  S.finales.filter(f=>f.fecha===ds&&!f.done).forEach(f=>items.push({t:f.materia+' (Final)',c:'var(--vi)'}));
+  S.eventos.filter(e=>e.fecha===ds).forEach(e=>items.push({t:e.titulo,c:'var(--cyan)'}));
+  card.style.display='block';
+  document.getElementById('sel-day-evs').innerHTML=items.length===0?'<div style="font-size:12px;color:var(--gray)">Sin eventos este día.</div>':items.map(i=>`<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--borde);font-size:13px"><div style="width:8px;height:8px;border-radius:50%;background:${i.c};flex-shrink:0"></div><div>${i.t}</div></div>`).join('');
+}
+function rUAP(){
+  const hd=hoy0();let ev=UAP.filter(e=>pF(e.f)>=hd).sort((a,b)=>new Date(a.f)-new Date(b.f));
+  if(uapF!=='todos')ev=ev.filter(e=>e.tipo===uapF);
+  const col=e=>e.tipo==='feriado'?'var(--amber)':e.tipo==='religioso'?'var(--vi)':'var(--blue3)';
+  document.getElementById('uap-lista').innerHTML=ev.slice(0,30).map(e=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--borde)"><div style="width:8px;height:8px;border-radius:50%;background:${col(e)};flex-shrink:0;margin-top:3px"></div><div><div style="font-size:12px;font-weight:600">${e.t}<span class="${e.tipo==='feriado'?'fbadge':'ubadge'}">${e.tipo==='feriado'?'Feriado':'UAP'}</span></div><div style="font-size:11px;color:var(--gray)">${toImg(e.f)}</div></div></div>`).join('')||'<div style="font-size:12px;color:var(--gray)">Sin eventos</div>';
+}
+function rMisEv(){
+  const col=t=>t==='examen'?'var(--rose)':t==='academico'?'var(--blue3)':'var(--cyan)';
+  const el=document.getElementById('mis-ev-lista');
+  el.innerHTML=[...S.eventos].sort((a,b)=>new Date(a.fecha)-new Date(b.fecha)).map(e=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--borde)"><div style="width:8px;height:8px;border-radius:50%;background:${col(e.tipo)};flex-shrink:0;margin-top:3px"></div><div style="flex:1"><div style="font-size:12px;font-weight:600">${e.titulo}</div><div style="font-size:11px;color:var(--gray)">${toImg(e.fecha)}</div></div><button class="del-btn" data-eid="${e.id}" style="width:22px;height:22px;font-size:11px">✕</button></div>`).join('')||'<div style="font-size:12px;color:var(--gray)">Sin eventos personales.</div>';
+  el.querySelectorAll('[data-eid]').forEach(b=>b.addEventListener('click',async()=>{S.eventos=S.eventos.filter(x=>x.id!==b.dataset.eid);await saveAll();rMisEv();rCalMes();}));
+}
+
+// ══════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════
+function rCfg(){
+  if(S.token) document.getElementById('cfg-tok').value=S.token;
+  document.getElementById('cfg-dias').value=S.alertDias||3;
+  updSyncSt();
+  const code=S.syncCode||'...';
+  document.getElementById('sync-code-display').textContent=code;
+  document.getElementById('sync-code-display2').textContent=code;
+  document.getElementById('pill-code').textContent=code;
+  const mans=[...S.tareas.filter(t=>t.manual),...S.parciales.filter(p=>p.manual),...S.finales.filter(f=>f.manual)];
+  const el=document.getElementById('cfg-mans');
+  el.innerHTML=mans.length===0?'<div style="font-size:12px;color:var(--gray)">Sin elementos manuales.</div>':mans.map(m=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--borde);font-size:13px"><div><strong>${m.desc||m.materia}</strong><br><span style="color:var(--gray);font-size:11px">${m.materia||''} ${m.fecha?'· '+fmt(m.fecha):''}</span></div><button class="btn bd bsm" data-mid="${m.id}" data-mtp="${S.tareas.find(t=>t.id===m.id)?'tarea':S.parciales.find(p=>p.id===m.id)?'parcial':'final'}">Borrar</button></div>`).join('');
+  el.querySelectorAll('[data-mid]').forEach(b=>b.addEventListener('click',async()=>{
+    const id=b.dataset.mid,tp=b.dataset.mtp;
+    if(tp==='tarea')S.tareas=S.tareas.filter(t=>t.id!==id);
+    else if(tp==='parcial')S.parciales=S.parciales.filter(p=>p.id!==id);
+    else S.finales=S.finales.filter(f=>f.id!==id);
+    await saveAll();rCfg();
+  }));
+}
+function updSyncSt(){
+  const dot=document.getElementById('sdot'),st=document.getElementById('sync-st-txt');
+  if(S.connected&&S.token){dot.classList.add('on');}
+  else dot.classList.remove('on');
+}
+function copiarCodigo(){
+  navigator.clipboard?.writeText(S.syncCode||'').then(()=>{
+    const el=document.getElementById('sync-code-display');
+    const orig=el.textContent;el.textContent='¡Copiado!';
+    setTimeout(()=>el.textContent=orig,1500);
+  }).catch(()=>alert('Tu código: '+S.syncCode));
+}
+
+// ══════════════════════════════════════════════════════
+// SYNC ENTRE DISPOSITIVOS (via JSON codificado en base64)
+// ══════════════════════════════════════════════════════
+function exportarDatos(){
+  const exportable={
+    tareas:S.tareas,parciales:S.parciales,finales:S.finales,
+    eventos:S.eventos,aulas:S.aulas,syncCode:S.syncCode,
+    ts:Date.now()
+  };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(exportable))));
+}
+
+function importarDatos(b64){
+  try{
+    const data=JSON.parse(decodeURIComponent(escape(atob(b64))));
+    // Merge: combinar sin duplicar por ID
+    const mergeArr=(local,remote)=>{
+      const ids=new Set(local.map(x=>x.id));
+      return [...local,...remote.filter(x=>!ids.has(x.id))];
+    };
+    S.tareas=mergeArr(S.tareas,data.tareas||[]);
+    S.parciales=mergeArr(S.parciales,data.parciales||[]);
+    S.finales=mergeArr(S.finales,data.finales||[]);
+    S.eventos=mergeArr(S.eventos,data.eventos||[]);
+    S.aulas=mergeArr(S.aulas,data.aulas||[]);
+    return true;
+  }catch(e){return false;}
+}
+
+// Guardado en URL hash para sync entre dispositivos del mismo navegador o compartido
+function guardarEnHash(){
+  try{
+    const data=exportarDatos();
+    // guardamos en sessionStorage con el código como clave para que otro dispositivo pueda leerlo
+    sessionStorage.setItem('sync_'+S.syncCode,data);
+    // También intentamos con BroadcastChannel para misma red
+    if(window.BroadcastChannel){
+      const bc=new BroadcastChannel('campus_uap_sync');
+      bc.postMessage({code:S.syncCode,data});
+      bc.close();
+    }
+  }catch(e){}
+}
+
+function importarPorCodigo(code){
+  // Intentar desde sessionStorage
+  const stored=sessionStorage.getItem('sync_'+code);
+  if(stored) return importarDatos(stored);
+  return false;
+}
+
+// ══════════════════════════════════════════════════════
+// MOODLE
+// ══════════════════════════════════════════════════════
+const ML='https://campusvirtual.uap.edu.ar';
+async function mAPI(tok,fn,params={}){
+  const u=new URL(`${ML}/webservice/rest/server.php`);
+  u.searchParams.set('wstoken',tok);u.searchParams.set('wsfunction',fn);u.searchParams.set('moodlewsrestformat','json');
+  Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
+  const r=await fetch(u.toString());if(!r.ok)throw new Error('HTTP '+r.status);
+  const d=await r.json();if(d&&d.errorcode)throw new Error(d.message||d.errorcode);return d;
+}
+function setP(pct,txt){const pw=document.getElementById('prog-wrap');if(pw)pw.style.display='block';const pf=document.getElementById('prog-fill');if(pf)pf.style.width=pct+'%';const pt=document.getElementById('prog-txt');if(pt)pt.textContent=txt;}
+function showCM(tp,txt){const el=document.getElementById('conn-msg');if(!el)return;el.className='conn-msg '+tp;el.style.display='block';el.textContent=txt;}
+
+async function syncML(tok){
+  setP(5,'Verificando...');await mAPI(tok,'core_webservice_get_site_info');S.connected=true;
+  setP(30,'Cargando cursos...');
+  const cs=await mAPI(tok,'core_enrol_get_users_courses',{userid:0});
+  if(Array.isArray(cs))S.materias=cs.filter(c=>c.visible!==0).map(c=>({id:c.id,fullname:c.fullname,shortname:c.shortname}));
+  setP(55,'Descargando tareas...');
+  const as=await mAPI(tok,'mod_assign_get_assignments');
+  const exi=new Set(S.tareas.map(t=>t.id));
+  if(as&&as.courses){as.courses.forEach(c=>(c.assignments||[]).forEach(a=>{const id='ml_'+a.id;if(!exi.has(id)&&a.duedate>0){S.tareas.push({id,materia:c.fullname,desc:a.name,tipo:'tarea',fecha:new Date(a.duedate*1000).toISOString().split('T')[0],notas:a.intro?a.intro.replace(/<[^>]+>/g,'').substring(0,200):'',manual:false,done:false});exi.add(id);}}));}
+  setP(80,'Sincronizando exámenes...');
+  const hTs=Math.floor(Date.now()/1000);
+  const evs=await mAPI(tok,'core_calendar_get_calendar_events',{'events[timestart]':hTs,'events[timeend]':hTs+180*86400});
+  const exI=new Set(S.parciales.map(x=>x.id));
+  const kw=['exam','examen','parcial','quiz','test','evaluaci'];
+  if(evs&&Array.isArray(evs.events)){evs.events.forEach(ev=>{const id='mev_'+ev.id,f=new Date(ev.timestart*1000).toISOString().split('T')[0];
+    const isEx=kw.some(k=>(ev.name||'').toLowerCase().includes(k));
+    if(isEx&&!exI.has(id)){S.parciales.push({id,materia:ev.course?.fullname||'UAP',desc:ev.name,tipo:'parcial1',fecha:f,hora:'',aula:'',notas:'',manual:false,done:false});exI.add(id);}
+    else if(!isEx&&!exi.has(id)){S.tareas.push({id,materia:ev.course?.fullname||'UAP',desc:ev.name,tipo:'evento',fecha:f,notas:'',manual:false,done:false});exi.add(id);}
+  });}
+  setP(100,'¡Listo!');S.lastSync=Date.now();await saveAll();guardarEnHash();
+}
+
+async function doSync(){
+  if(!S.token){showCM('err','Configurá tu token primero.');return;}
+  const btn=document.getElementById('btn-sync');btn.disabled=true;
+  btn.style.animation='spin .7s linear infinite';
+  try{await syncML(S.token);updSyncSt();rDash();}
+  catch(e){console.error(e);}
+  finally{btn.disabled=false;btn.style.animation='';}
+}
+
+// ══════════════════════════════════════════════════════
+// SHEETS
+// ══════════════════════════════════════════════════════
+function openSheet(id){document.getElementById(id).classList.add('open');}
+function closeSheet(id){document.getElementById(id).classList.remove('open');}
+
+// ══════════════════════════════════════════════════════
+// INSTALL PWA
+// ══════════════════════════════════════════════════════
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-banner').style.display='flex';
+});
+document.getElementById('install-btn').addEventListener('click',async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  const{outcome}=await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  document.getElementById('install-banner').style.display='none';
+});
+window.addEventListener('appinstalled',()=>{document.getElementById('install-banner').style.display='none';});
+
+// ══════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════
+async function init(){
+  await loadAll();
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW:',e));
+  }
+
+  // BroadcastChannel listener (sync en tiempo real si ambos dispositivos están abiertos en la misma red)
+  if(window.BroadcastChannel){
+    const bc=new BroadcastChannel('campus_uap_sync');
+    bc.onmessage=async e=>{
+      if(e.data.code===S.syncCode&&e.data.data){
+        importarDatos(e.data.data);await saveAll();rDash();
+      }
+    };
+  }
+
+  // Nav
+  document.querySelectorAll('.bnav-item[data-pg]').forEach(el=>el.addEventListener('click',()=>goTo(el.dataset.pg)));
+
+  // Cal
+  document.getElementById('cal-prev').addEventListener('click',()=>{cM--;if(cM<0){cM=11;cY--;}rCal();});
+  document.getElementById('cal-next').addEventListener('click',()=>{cM++;if(cM>11){cM=0;cY++;}rCal();});
+
+  // Sync btn
+  document.getElementById('btn-sync').addEventListener('click',doSync);
+
+  // Tabs tareas
+  document.querySelectorAll('#tar-tabs .tbtn').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#tar-tabs .tbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');tarF=b.dataset.f;rTar();
+  }));
+
+  // Tabs exámenes
+  document.querySelectorAll('#ex-tabs .tbtn').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#ex-tabs .tbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+    exTab=b.dataset.et;
+    document.getElementById('ex-parciales-view').style.display=exTab==='parciales'?'block':'none';
+    document.getElementById('ex-finales-view').style.display=exTab==='finales'?'block':'none';
+    rEx();
+  }));
+
+  // Tabs UAP
+  document.querySelectorAll('#uap-tabs .tbtn').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#uap-tabs .tbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');uapF=b.dataset.ut;rUAP();
+  }));
+
+  // Sheets — cerrar al tocar fuera
+  document.querySelectorAll('.sheet-overlay').forEach(ov=>ov.addEventListener('click',e=>{if(e.target===ov)ov.classList.remove('open');}));
+
+  // Modal tarea
+  document.getElementById('btn-mt-sv').addEventListener('click',async()=>{
+    const m=document.getElementById('mt-m').value.trim(),d=document.getElementById('mt-d').value.trim(),f=document.getElementById('mt-f').value;
+    if(!m||!d||!f){alert('Completá materia, descripción y fecha.');return;}
+    S.tareas.push({id:'m_'+Date.now(),materia:m,desc:d,tipo:document.getElementById('mt-t').value,fecha:f,notas:document.getElementById('mt-n').value,manual:true,done:false});
+    await saveAll();closeSheet('sheet-tarea');['mt-m','mt-d','mt-f','mt-n'].forEach(id=>document.getElementById(id).value='');rTar();rDash();
+  });
+
+  // Modal parcial
+  document.getElementById('btn-mp-sv').addEventListener('click',async()=>{
+    const m=document.getElementById('mp-m').value.trim(),f=document.getElementById('mp-f').value;
+    if(!m){alert('Ingresá la materia.');return;}
+    S.parciales.push({id:'p_'+Date.now(),materia:m,desc:document.getElementById('mp-d').value||'Parcial',tipo:document.getElementById('mp-t').value,fecha:f||'',hora:document.getElementById('mp-h').value,aula:document.getElementById('mp-a').value,notas:document.getElementById('mp-n').value,manual:true,done:false});
+    await saveAll();closeSheet('sheet-parcial');['mp-m','mp-d','mp-f','mp-h','mp-a','mp-n'].forEach(id=>document.getElementById(id).value='');rEx();rDash();
+  });
+
+  // Modal final
+  document.getElementById('btn-mf-sv').addEventListener('click',async()=>{
+    const m=document.getElementById('mf-m').value.trim();
+    if(!m){alert('Ingresá la materia.');return;}
+    S.finales.push({id:'f_'+Date.now(),materia:m,tipo:document.getElementById('mf-t').value,fecha:document.getElementById('mf-f').value||'',hora:document.getElementById('mf-h').value,aula:document.getElementById('mf-a').value,notas:document.getElementById('mf-n').value,manual:true,done:false});
+    await saveAll();closeSheet('sheet-final');['mf-m','mf-f','mf-h','mf-a','mf-n'].forEach(id=>document.getElementById(id).value='');rFinales();rDash();
+  });
+
+  // Modal evento
+  document.getElementById('btn-mev-sv').addEventListener('click',async()=>{
+    const ti=document.getElementById('mev-ti').value.trim(),f=document.getElementById('mev-f').value;
+    if(!ti||!f){alert('Completá título y fecha.');return;}
+    S.eventos.push({id:'ev_'+Date.now(),titulo:ti,fecha:f,tipo:document.getElementById('mev-t').value,notas:document.getElementById('mev-n').value});
+    await saveAll();closeSheet('sheet-ev');['mev-ti','mev-f','mev-n'].forEach(id=>document.getElementById(id).value='');rMisEv();if(curPg==='calendario')rCal();
+  });
+
+  // Modal aula
+  document.getElementById('btn-au-sv').addEventListener('click',async()=>{
+    const m=document.getElementById('au-mat').value.trim(),u=document.getElementById('au-ub').value.trim();
+    if(!m||!u){alert('Completá materia y ubicación.');return;}
+    S.aulas.push({id:'au_'+Date.now(),materia:m,ubicacion:u,dias:document.getElementById('au-dia').value});
+    await saveAll();closeSheet('sheet-aula');['au-mat','au-ub','au-dia'].forEach(id=>document.getElementById(id).value='');rHor();
+  });
+
+  // Config token
+  document.getElementById('btn-save-tok').addEventListener('click',async()=>{
+    const tok=document.getElementById('cfg-tok').value.trim();
+    if(!tok){showCM('err','Ingresá tu token.');return;}
+    S.token=tok;await saveAll();showCM('load','Conectando y sincronizando...');
+    try{await syncML(tok);showCM('ok','✓ Conectada. Datos sincronizados.');updSyncSt();rCfg();}
+    catch(e){showCM('err','Error: '+e.message);S.connected=false;await saveAll();}
+  });
+
+  document.getElementById('btn-save-cfg').addEventListener('click',async()=>{
+    S.alertDias=parseInt(document.getElementById('cfg-dias').value)||3;
+    await saveAll();showCM('ok','✓ Guardado.');setTimeout(()=>{const el=document.getElementById('conn-msg');if(el)el.style.display='none';},2000);
+  });
+
+  // Import sync code
+  const doImport=async(inputId,resultId)=>{
+    const code=document.getElementById(inputId).value.trim().toUpperCase();
+    if(!code){alert('Ingresá un código.');return;}
+    const ok=importarPorCodigo(code);
+    const resEl=document.getElementById(resultId);resEl.style.display='block';
+    if(ok){await saveAll();resEl.textContent='✓ Datos importados correctamente.';resEl.style.color='var(--em)';rDash();}
+    else{resEl.textContent='No se encontraron datos para ese código en este dispositivo. Asegurate de que el otro dispositivo esté abierto con la app al mismo tiempo.';resEl.style.color='var(--rose)';}
+  };
+  document.getElementById('btn-import-code').addEventListener('click',()=>doImport('input-sync-code','sync-result'));
+  document.getElementById('btn-import-code2').addEventListener('click',()=>doImport('input-sync-code2','sync-result2'));
+
+  rDash();rHor();
+  guardarEnHash();
+
+  if(S.token&&S.connected){
+    const df=S.lastSync?Date.now()-S.lastSync:Infinity;
+    if(df>6*3600*1000) doSync();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
